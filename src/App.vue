@@ -5,7 +5,10 @@
 </template>
 
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+    
     * {
-        font-family: sans-serif !important;
+        font-family: 'Roboto', sans-serif !important;
+        font-weight: 300;
     }
 </style>

@@ -1,20 +1,36 @@
 <template>
     <div>
         <main>
-            <button @click="resetFilters()"><font-awesome-icon icon="redo" /></button>
+            <button @click="resetFilters()">Ladda om <font-awesome-icon icon="redo" /></button>
             <table>
                 <tr>
                     <td v-for="(header, header_index) in columnHeaders" :key="header_index">
                         <h2 v-text="header.substring(0, 1).toUpperCase() +  header.substring(1, header.length)"></h2>
-                        <button @click="sortBy(header)">Sortera a-ö/ö-a</button>
-                        <input v-model="searchFields[header.replace(' ', '').toLowerCase()].model" placeholder="Sök..." @input="filterBy()"/>
+                        <button @click="sortBy(header)">Sortera a-ö (0-99)/ö-a (99-0)</button>
+                        <div v-if="filterTypes[header].type === 'search'">
+                            <input type="search" v-model="filterFields[header].model" placeholder="Sök..." @input="filterBy()"/>
+                        </div>
+                        <div v-else-if="filterTypes[header].type === 'category'">
+                            <input type="search" :list="header.replace(' ', '') + '-list'" v-model="filterFields[header].model" placeholder="Sök..."  @input="filterBy()">
+                            <datalist :id="header.replace(' ', '') + '-list'">
+                                <div v-for="(value, value_index) in filterTypes[header].values" :key="value_index">
+                                    <option :value="value"></option>
+                                </div>
+                            </datalist>
+                        </div>
+                        <div v-else-if="filterTypes[header].type === 'range'">
+                            <p v-text="filterFields[header].model"></p>
+                            <input value="0" type="range" :id="header.replace(' ', '') + '-range'" v-model="filterFields[header].model" placeholder="Sök..." @input="filterBy()" :min="filterTypes[header].min" :max="filterTypes[header].max">
+                        </div>
                     </td>
                 </tr>
-                <tr v-for="(row, row_index) in listData" :key="row_index">
-                    <td v-for="(col, col_index) in row" :key="col_index">
-                        <p v-text="col"></p>
-                    </td>
-                </tr>
+                <tbody>
+                    <tr v-for="(row, row_index) in listData" :key="row_index">
+                        <td v-for="(col, col_index) in row" :key="col_index">
+                            <p v-text="col"></p>
+                        </td>
+                    </tr>
+                </tbody>
             </table>
         </main>
     </div>
@@ -32,8 +48,9 @@
                 onceFetched: [],
                 listData: [],
                 columnHeaders: [],
-                searchFields: {},
-                currentSortOrder_s: {}
+                filterFields: {},
+                currentSortOrder_s: {},
+                filterTypes: {},
             };
         },
         methods: {
@@ -70,9 +87,9 @@
             filterBy() {
                 let filterObj = {};
                 
-                for (let i = 0; i < Object.keys(this.searchFields).length; i++) {
-                    let tmpSearchField = this.searchFields[
-                            Object.keys(this.searchFields)[i]
+                for (let i = 0; i < Object.keys(this.filterFields).length; i++) {
+                    let tmpSearchField = this.filterFields[
+                            Object.keys(this.filterFields)[i]
                             ];
                     filterObj[tmpSearchField.column] = tmpSearchField.model;
                 }
@@ -96,6 +113,51 @@
                 }
             },
             
+            getColumnValues(column) {
+                let column_values = [];
+                
+                for (let row_i = 0; row_i < this.listData.length; row_i++) {
+                    let row = this.listData[row_i];
+                    let column_value = row[column];
+                    if (!column_values.includes(column_value)) {
+                        column_values.push(column_value);
+                    }
+                }
+                
+                return column_values;
+            },
+            
+            getFilterTypes() {
+                let filterRow;
+                
+                for (let i = 0; i < this.listData.length; i++) {
+                    if (i === 0) {
+                        filterRow = this.listData[i];
+                        break;
+                    }
+                }
+                this.listData.splice(0, 1);
+    
+                for (let filter_i = 0; filter_i < Object.keys(filterRow).length; filter_i++) {
+                    let forColumn = Object.keys(filterRow)[filter_i];
+                    
+                    let filterType = filterRow[forColumn];
+                    this.filterTypes[forColumn] = {
+                        type: filterType,
+                    };
+                    
+                    if (filterType === 'category') {
+                       this.filterTypes[forColumn]['values'] = this.getColumnValues(forColumn)
+                    }
+                    
+                    if (filterType === 'range') {
+                        const values = this.getColumnValues(forColumn);
+                        this.filterTypes[forColumn]['max'] = Math.max(...values);
+                        this.filterTypes[forColumn]['min'] = Math.min(...values);
+                    }
+                }
+            },
+            
             getColumnHeaders() {
                 let tmp_header;
                 let key_i;
@@ -110,7 +172,7 @@
                         tmp_header = Object.keys(this.listData[row_i])[key_i];
                         if (!this.columnHeaders.includes(tmp_header)) {
                             this.columnHeaders.push(tmp_header);
-                            this.searchFields[tmp_header.replace(" ", "").toLowerCase()] = {
+                            this.filterFields[tmp_header] = {
                                 model: "",
                                 column: tmp_header
                             };
@@ -118,6 +180,7 @@
                     }
                 }
             },
+            
             listDataLoader(results, filterObj) {
                 if (Object.keys(filterObj).length > 0) {
                     let tmpResults = {};
@@ -185,6 +248,7 @@
                     GSheetReader(readerOptions, results => {
                         this.onceFetched = results;
                         this.listDataLoader(results, filterObj);
+                        this.getFilterTypes();
                     });
                 } else {
                     this.listDataLoader(this.onceFetched, filterObj);
@@ -237,8 +301,17 @@
     }
     
     td p {
-        font-size: 1.2em;
+        font-size: 16px;
+        line-height: 24px;
         color: #4f4f4f;
         padding: 5px;
+    }
+
+    tbody tr:nth-child(odd){
+        background-color: #F3F1ED !important;
+    }
+    
+    .search-area {
+        visibility: hidden;
     }
 </style>
