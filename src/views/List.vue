@@ -19,8 +19,10 @@
                             </datalist>
                         </div>
                         <div v-else-if="filterTypes[header].type === 'range'">
-                            <p v-text="filterFields[header].model"></p>
-                            <input value="0" type="range" :id="header.replace(' ', '') + '-range'" v-model="filterFields[header].model" placeholder="Sök..." @input="filterBy()" :min="filterTypes[header].min" :max="filterTypes[header].max">
+                            <p v-text="filterFields[header].model + ' - ' + filterFields[header].model2"></p>
+                            <input value="0" type="range" :id="header.replace(' ', '') + '-range'" v-model="filterFields[header].model" placeholder="Minst" @input="filterBy()" :min="filterTypes[header].min" :max="filterTypes[header].max">
+                            <input value="0" type="range" :id="header.replace(' ', '') + '-range2'" v-model="filterFields[header].model2" placeholder="Högst" @input="filterBy()" :min="filterTypes[header].min" :max="filterTypes[header].max">
+                            <button @click="resetRange(header)"><font-awesome-icon icon="redo" /></button>
                         </div>
                     </td>
                 </tr>
@@ -54,6 +56,13 @@
             };
         },
         methods: {
+            resetRange(header) {
+                document.querySelector('#' + header.replace(' ', '') + '-range').value = '';
+                document.querySelector('#' + header.replace(' ', '') + '-range2').value = '';
+                this.filterFields[header].model = '';
+                this.filterFields[header].model2 = '';
+                this.filterBy();
+            },
             resetFilters() {
                 this.onceFetched = [];
                 this.fetchListData({})
@@ -77,6 +86,7 @@
                 }
                 
                 this.currentSortOrder_s[column] = order;
+                console.log(this.listData);
                 
                 this.listData = sortArray(this.listData, {
                     by: column,
@@ -92,6 +102,9 @@
                             Object.keys(this.filterFields)[i]
                             ];
                     filterObj[tmpSearchField.column] = tmpSearchField.model;
+                    if ('model2' in tmpSearchField) {
+                        filterObj[tmpSearchField.column] = [tmpSearchField.model, tmpSearchField.model2];
+                    }
                 }
                 
                 let checker = [];
@@ -154,6 +167,7 @@
                         const values = this.getColumnValues(forColumn);
                         this.filterTypes[forColumn]['max'] = Math.max(...values);
                         this.filterTypes[forColumn]['min'] = Math.min(...values);
+                        this.filterFields[forColumn]['model2'] = ''
                     }
                 }
             },
@@ -173,7 +187,7 @@
                         if (!this.columnHeaders.includes(tmp_header)) {
                             this.columnHeaders.push(tmp_header);
                             this.filterFields[tmp_header] = {
-                                model: "",
+                                model: '',
                                 column: tmp_header
                             };
                         }
@@ -196,19 +210,43 @@
                                 title: Object.keys(filterObj)[filter_i],
                                 filter: filterObj[Object.keys(filterObj)[filter_i]]
                             };
+
+                            if (Array.isArray(filterObj[Object.keys(filterObj)[filter_i]])) {
+                                tmpFilter.filter = 'is_range';
+                                tmpFilter['min'] = filterObj[Object.keys(filterObj)[filter_i]][0];
+                                tmpFilter['max'] = filterObj[Object.keys(filterObj)[filter_i]][1];
+                            }
                             
                             if (Object.keys(tmpResult).includes(tmpFilter.title)) {
-                                if (
-                                        tmpResult[tmpFilter.title]
-                                                .toLowerCase()
-                                                .includes(tmpFilter.filter.toLowerCase())
-                                ) {
-                                    if (!Object.keys(tmpResults).includes(tmpFilter.title)) {
-                                        tmpResults[tmpFilter.title] = [];
+                                if (tmpFilter.filter === 'is_range') {
+                                    let min = tmpFilter.min;
+                                    let max = tmpFilter.max;
+
+                                    if (isFinite(tmpResult[tmpFilter.title])) {
+                                        if (Number(tmpResult[tmpFilter.title]) >= min && tmpResult[tmpFilter.title] <= max) {
+                                            if (!Object.keys(tmpResults).includes(tmpFilter.title)) {
+                                                tmpResults[tmpFilter.title] = [];
+                                            }
+
+                                            if (!tmpResults[tmpFilter.title].includes(tmpResult)) {
+                                                tmpResults[tmpFilter.title].push(tmpResult);
+                                            }
+                                        }
                                     }
-                                    
-                                    if (!tmpResults[tmpFilter.title].includes(tmpResult)) {
-                                        tmpResults[tmpFilter.title].push(tmpResult);
+
+                                } else {
+                                    if (
+                                        tmpResult[tmpFilter.title]
+                                            .toLowerCase()
+                                            .includes(tmpFilter.filter.toLowerCase())
+                                    ) {
+                                        if (!Object.keys(tmpResults).includes(tmpFilter.title)) {
+                                            tmpResults[tmpFilter.title] = [];
+                                        }
+
+                                        if (!tmpResults[tmpFilter.title].includes(tmpResult)) {
+                                            tmpResults[tmpFilter.title].push(tmpResult);
+                                        }
                                     }
                                 }
                             }
@@ -313,5 +351,13 @@
     
     .search-area {
         visibility: hidden;
+    }
+
+    button {
+        padding: 5px;
+        border: 1px solid #1f1f1f;
+        box-shadow: none;
+        margin-top: 5px;
+        margin-bottom: 5px;
     }
 </style>
