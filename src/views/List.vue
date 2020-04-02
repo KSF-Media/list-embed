@@ -1,30 +1,43 @@
 <template>
     <div>
         <main>
-            <button @click="resetFilters()">Ladda om <font-awesome-icon icon="redo" /></button>
-            <table>
+            <button @click="resetFilters()"><font-awesome-icon icon="redo" /></button>
+            <table aria-describedby="list data">
                 <tr>
-                    <td v-for="(header, header_index) in columnHeaders" :key="header_index">
-                        <h2 v-text="header.substring(0, 1).toUpperCase() +  header.substring(1, header.length)"></h2>
-                        <button @click="sortBy(header)">Sortera a-ö (0-99)/ö-a (99-0)</button>
-                        <div v-if="filterTypes[header].type === 'search'">
-                            <input type="search" v-model="filterFields[header].model" placeholder="Sök..." @input="filterBy()"/>
-                        </div>
-                        <div v-else-if="filterTypes[header].type === 'category'">
-                            <input type="search" :list="header.replace(' ', '') + '-list'" v-model="filterFields[header].model" placeholder="Sök..."  @input="filterBy()">
-                            <datalist :id="header.replace(' ', '') + '-list'">
-                                <div v-for="(value, value_index) in filterTypes[header].values" :key="value_index">
-                                    <option :value="value"></option>
+                    <th v-for="(header, header_index) in columnHeaders" :key="header_index">
+                        <div class="th-data">
+                            <h2 v-text="header.substring(0, 1).toUpperCase() +  header.substring(1, header.length)"></h2>
+                            <div class="row mx-auto">
+                                <div class="col-12" v-if="filterTypes[header].type === 'search'">
+                                    <div class="row search-area">
+                                        <input class="col-12" type="search" v-model="filterFields[header].model" placeholder="Sök..." @input="filterBy()"/>
+                                    </div>
                                 </div>
-                            </datalist>
+                                <div class="col-12" v-else-if="filterTypes[header].type === 'category'">
+                                    <div class="row search-area">
+                                        <input class="col-12" type="search" :list="header.replace(' ', '') + '-list'" v-model="filterFields[header].model" placeholder="Sök..."  @input="filterBy()">
+                                        <datalist :id="header.replace(' ', '') + '-list'">
+                                            <div v-for="(value, value_index) in filterTypes[header].values" :key="value_index">
+                                                <option :value="value"></option>
+                                            </div>
+                                        </datalist>
+                                    </div>
+                                </div>
+                                <div class="col-12 range-input-area" v-else-if="filterTypes[header].type === 'range'">
+                                    <div class="row search-area">
+                                        <input class="slider col-4" value="0" type="range" :id="header.replace(' ', '') + '-range'" v-model="filterFields[header].model" placeholder="Minst" @input="filterBy()" :min="filterTypes[header].min" :max="filterTypes[header].max">
+                                        <p class="range-label col-4" v-text="getRangeLabel(filterFields[header])"></p>
+                                        <input class="slider col-4" value="0" type="range" :id="header.replace(' ', '') + '-range2'" v-model="filterFields[header].model2" placeholder="Högst" @input="filterBy()" :min="filterTypes[header].min" :max="filterTypes[header].max">
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <button @click="sortBy(header, 'asc')" :id="header.replace(' ', '') + '-asc-btn'"><font-awesome-icon icon="sort-alpha-down"/></button>
+                                    <button v-if="filterTypes[header].type === 'range'" @click="resetRange(header)"><font-awesome-icon icon="redo" /></button>
+                                    <button @click="sortBy(header, 'desc')" :id="header.replace(' ', '') + '-desc-btn'"><font-awesome-icon icon="sort-alpha-down-alt"/></button>
+                                </div>
+                            </div>
                         </div>
-                        <div v-else-if="filterTypes[header].type === 'range'">
-                            <p v-text="filterFields[header].model + ' - ' + filterFields[header].model2"></p>
-                            <input value="0" type="range" :id="header.replace(' ', '') + '-range'" v-model="filterFields[header].model" placeholder="Minst" @input="filterBy()" :min="filterTypes[header].min" :max="filterTypes[header].max">
-                            <input value="0" type="range" :id="header.replace(' ', '') + '-range2'" v-model="filterFields[header].model2" placeholder="Högst" @input="filterBy()" :min="filterTypes[header].min" :max="filterTypes[header].max">
-                            <button @click="resetRange(header)"><font-awesome-icon icon="redo" /></button>
-                        </div>
-                    </td>
+                    </th>
                 </tr>
                 <tbody>
                     <tr v-for="(row, row_index) in listData" :key="row_index">
@@ -51,11 +64,27 @@
                 listData: [],
                 columnHeaders: [],
                 filterFields: {},
-                currentSortOrder_s: {},
                 filterTypes: {},
             };
         },
         methods: {
+            getRangeLabel(filter) {
+                let label = '';
+                if (!filter.model) {
+                    label = '0 - '
+                } else {
+                    label = filter.model + ' - '
+                }
+
+                if (!filter.model2) {
+                    label += '0'
+                } else {
+                    label += filter.model2
+                }
+
+                return label
+
+            },
             resetRange(header) {
                 document.querySelector('#' + header.replace(' ', '') + '-range').value = '';
                 document.querySelector('#' + header.replace(' ', '') + '-range2').value = '';
@@ -68,30 +97,20 @@
                 this.fetchListData({})
             },
             
-            sortBy(column) {
-                let order = 'asc';
-                
-                if (column in this.currentSortOrder_s) {
-                    switch (this.currentSortOrder_s[column]) {
-                        case 'asc':
-                            order = 'desc';
-                            break;
-                        case 'desc':
-                            order = 'asc';
-                            break;
-                        default:
-                            order = 'asc';
-                            break;
-                    }
-                }
-                
-                this.currentSortOrder_s[column] = order;
-                console.log(this.listData);
-                
+            sortBy(column, order) {
                 this.listData = sortArray(this.listData, {
                     by: column,
                     order: order,
-                })
+                });
+
+                const all_actives = document.getElementsByClassName('active-btn');
+
+                for (let i = 0; i < all_actives.length; i++) {
+                    let tmpBtn = all_actives[i];
+                    tmpBtn.classList.toggle('active-btn');
+                }
+
+                document.querySelector('#' + column.replace(' ', '') + '-' + order + '-btn').classList.toggle('active-btn');
             },
             
             filterBy() {
@@ -309,55 +328,107 @@
     main {
         width: 100%;
         height: 100%;
+        padding: 10px;
     }
     
     table {
         width: 100%;
         overflow: scroll;
     }
-    
-    table input {
-        padding: 10px;
-        font-size: 1.2em;
-        border: 1px solid #eee;
-        border-radius: 10px;
-        width: 80%;
-        box-shadow: none;
-        outline: none;
+
+    .th-data {
+        text-align: center;
+        width: 100%;
     }
-    
-    td h2 {
-        font-size: 1.3em;
+
+    h2 {
+        font-size: 1em !important;
+        font-weight: bold !important;
         padding: 2px;
         border-radius: 10px;
         max-width: 50%;
         margin-left: auto;
         margin-right: auto;
         text-align: center;
-        background-color: #eee;
         color: #444;
-    }
-    
-    td p {
-        font-size: 16px;
-        line-height: 24px;
-        color: #4f4f4f;
-        padding: 5px;
     }
 
     tbody tr:nth-child(odd){
         background-color: #F3F1ED !important;
     }
-    
+
+    td p {
+        font-size: 16px;
+        line-height: 20px;
+        color: #4f4f4f;
+        padding: 5px;
+    }
+
     .search-area {
-        visibility: hidden;
+        width: 90%;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     button {
         padding: 5px;
-        border: 1px solid #1f1f1f;
+        border: 1px solid #ddd;
         box-shadow: none;
-        margin-top: 5px;
-        margin-bottom: 5px;
+        margin: 10px;
+        border-radius: 5px;
+        background-color: #fff;
+    }
+
+    button * {
+        font-size: 1em;
+        color: #555;
+        display: flex;
+        align-items: center;
+    }
+
+    button:hover {
+        background-color: #ddd;
+        cursor: pointer;
+    }
+
+    .active-btn {
+        background-color: #ddd;
+    }
+
+    input {
+        padding: 5px;
+        font-size: 0.8em;
+        border: 1px solid #eee;
+        border-radius: 5px;
+        width: 80%;
+        box-shadow: none;
+        outline: none;
+        height: 35px;
+    }
+
+    .slider {
+        height: 19px;
+        margin-top: 8px;
+        margin-bottom: 8px;
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        background: #ddd;
+        opacity: 0.7;
+        -webkit-transition: .2s;
+        transition: opacity .2s;
+    }
+
+    .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        height: 13px;
+        width: 13px;
+        border-radius: 50%;
+        background: #444;
+    }
+
+    * {
+        box-shadow: none !important;
+        outline: none !important;
     }
 </style>
