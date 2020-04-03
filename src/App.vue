@@ -11,4 +11,9 @@
         font-family: 'Roboto', sans-serif !important;
         font-weight: 300 !important;
     }
+
+    body {
+        padding: 0;
+        margin: 0;
+    }
 </style>
