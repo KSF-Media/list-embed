@@ -328,7 +328,8 @@
     main {
         width: 100%;
         height: 100%;
-        padding: 10px;
+        padding: 5px;
+        background-color: #f7f7f7;
     }
     
     table {
@@ -374,7 +375,7 @@
         padding: 5px;
         border: 1px solid #ddd;
         box-shadow: none;
-        margin: 10px;
+        margin: 5px;
         border-radius: 5px;
         background-color: #fff;
     }
@@ -400,7 +401,7 @@
         font-size: 0.8em;
         border: 1px solid #eee;
         border-radius: 5px;
-        width: 80%;
+        width: 100%;
         box-shadow: none;
         outline: none;
         height: 35px;
@@ -431,4 +432,27 @@
         box-shadow: none !important;
         outline: none !important;
     }
+
+    @media screen and (max-width: 600px) {
+        table {
+            padding: 10px;
+        }
+
+        table tr {
+            border-bottom: 3px solid #ddd;
+            display: block;
+            margin-bottom: .625em;
+            text-align: center;
+        }
+
+        table td, table th {
+            border-bottom: 1px solid #ddd;
+            display: block;
+            font-size: .8em;
+        }
+
+        table td:last-child {
+            border-bottom: 0;
+        }
+}
 </style>

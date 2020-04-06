@@ -34,7 +34,7 @@
             generate() {
                 if (this.url) {
                     const id = this.url.replace('https://docs.google.com/spreadsheets/d/', '').replace('/edit#gid=0', '');
-                    this.iframe = '<iframe src="' + window.location.protocol + '//' + window.location.hostname + '/list/' + id + '"></iframe>';
+                    this.iframe = '<iframe src="' + window.location.protocol + '//' + window.location.hostname + '/list/' + id + '" width="100%" height="500px"></iframe>';
 
                     this.done = true;
                 }
