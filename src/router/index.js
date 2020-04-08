@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import List from "../views/List";
 import Generate from "../views/Generate"
+import Help from "../views/Help"
 
 Vue.use(VueRouter);
 
@@ -16,6 +17,11 @@ const routes = [
         props: true,
         name: 'List',
         component: List,
+    },
+    {
+        path: '/help',
+        name: 'Help',
+        component: Help,
     },
 ];
 

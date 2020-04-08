@@ -16,6 +16,10 @@
                     <code v-text="iframe" id="iframe-code"></code>
                 </div>
             </div>
+
+            <div id="help">
+                <router-link to="help"><font-awesome-icon icon="question-circle"/></router-link>
+            </div>
         </div>
     </main>
 </template>
@@ -84,7 +88,7 @@
     #form {
         padding: 10px;
         padding-top: 60px;
-        padding-bottom: 80px;
+        padding-bottom: 20px;
         margin-top: 20px;
         border-radius: 10px;
         text-align: center;
@@ -118,6 +122,26 @@
         margin-right: auto;
         box-shadow: none !important;
         outline: none;
+    }
+
+    #result {
+        margin-bottom: 20px;
+    }
+
+    #help {
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+    }
+
+    #help * * {
+        font-size: 2em;
+        color: #3f3f3f;
+    }
+
+    #help *:hover * {
+        cursor: pointer;
+        color: var(--info);
     }
 
     @media screen and (max-width: 450px) {
