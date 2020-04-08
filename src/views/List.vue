@@ -343,7 +343,7 @@
     }
 
     h2 {
-        font-size: 1em !important;
+        font-size: 1.2em !important;
         font-weight: bold !important;
         padding: 2px;
         border-radius: 10px;
@@ -398,8 +398,8 @@
 
     input {
         padding: 5px;
-        font-size: 0.8em;
-        border: 1px solid #eee;
+        font-size: 1em;
+        border: 1px solid #F3F1ED;
         border-radius: 5px;
         width: 100%;
         box-shadow: none;
@@ -438,20 +438,24 @@
             padding: 10px;
         }
 
-        table tr {
+        .th-data {
+            border-top: 2px solid #ddd;
+            padding-top: 5px;
+        }
+
+        tr {
             border-bottom: 3px solid #ddd;
             display: block;
             margin-bottom: .625em;
             text-align: center;
         }
 
-        table td, table th {
-            border-bottom: 1px solid #ddd;
+        td, th {
+            border-bottom: 1px solid #F3F1ED;
             display: block;
-            font-size: .8em;
         }
 
-        table td:last-child {
+        td:last-child {
             border-bottom: 0;
         }
 }
