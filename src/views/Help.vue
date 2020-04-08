@@ -2,19 +2,33 @@
     <div id="help">
         <h1>Help</h1>
         <div class="guide">
-            <h2>How to setup your Google Spreadsheet</h2>
+            <h2>How to setup a Google Spreadsheet for use with the embeddable list</h2>
             <ul>
-                <li>1. Publishing your spreadsheet to the web</li>
-                <li class="li-under-1">Click on "File" and select "Publish to the web".</li>
+                <li>1. Setting up the spreadsheet</li>
+                <li class="li-under-1">Put your column headers on the first row.</li>
+                <li class="li-under-1">Configure filtering on the second row. The available filter types are: <em>category</em>, <em>search</em>, and <em>range.</em>. You can also leave the cell blank for no filtering.</li>
+                <li class="li-under-1 li-under-1-info">
+                    <h3>Different filtering options:</h3>
+                    <h4>- Search</h4>
+                    <p>A simple search box that matches exact text.</p>
+                    <h4>- Category</h4>
+                    <p>Picks out all cells in the column and put's them in a (searchable) drop-down.</p>
+                    <h4>- Range</h4>
+                    <p>Two sliders that go from the lowest to the highest number in the column's cells.</p>
+                    <p>Shows all cells with numbers between (and matching) the slider's values.</p>
+                </li>
+                <li class="li-under-1">Example:</li>
                 <li class="li-under-1 li-under-1-img"><img src="../assets/guide1.png" alt="Step 1"></li>
-                <li class="li-under-1">Click on "Publish".</li>
+                <li>2. Publishing your spreadsheet to the web</li>
+                <li class=" li-under-1">Click on "File" and select "Publish to the web".</li>
                 <li class="li-under-1 li-under-1-img"><img src="../assets/guide2.png" alt="Step 2"></li>
-                <li class="li-under-1">Click on "OK" in the browser pop-up.</li>
-                <li class="li-under-1">Close the publish to the web modal.</li>
-                <li>2. Getting the embedding code</li>
-                <li class="li-under-1">Copy your spreadsheet's url from the address bar.</li>
+                <li class="li-under-1">Click on "Publish".</li>
                 <li class="li-under-1 li-under-1-img"><img src="../assets/guide3.png" alt="Step 3"></li>
-                <li class="li-under-1">Go to the list-embed page <a href="https://list-embed.netlify.com" target="_blank" rel="noopener noreferrer">here</a>, and paste in the url</li>
+                <li class="li-under-1">Click "OK" in the browser pop-up.</li>
+                <li>3. Getting the embedding code</li>
+                <li class="li-under-1">Copy the spreadsheet's url from the address bar.</li>
+                <li class="li-under-1 li-under-1-img"><img src="../assets/guide4.png" alt="Step 4"></li>
+                <li class="li-under-1">Go to the <a href="https://list-embed.netlify.com" target="_blank" rel="noopener noreferrer">list-embed page</a>, and paste in the url</li>
                 <li class="li-under-1">Click on "OK" and copy the embedding code.</li>
             </ul>
         </div>
@@ -62,12 +76,29 @@
         margin-left: 30px;
     }
 
-    .li-under-1-img {
+    .li-under-1-img, .li-under-1-info {
         list-style-type: none;
     }
 
     .li-under-1-img img {
         max-width: 450px;
+    }
+
+    .li-under-1-info {
+        background-color: var(--info);
+        border-radius: 10px;
+        color: #fff;
+        padding: 20px !important;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    .li-under-1-info p {
+        margin-left: 15px;
+    }
+
+    .li-under-1-info h3 {
+        color: #1f1f1f;
     }
 
     @media screen and (max-width: 760px) {
