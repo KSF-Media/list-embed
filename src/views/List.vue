@@ -26,14 +26,13 @@
                                 <div class="col-12 range-input-area" v-else-if="filterTypes[header].type === 'range'">
                                     <div class="row search-area">
                                         <input class="slider col-4" value="0" type="range" :id="header.replace(' ', '') + '-range'" v-model="filterFields[header].model" placeholder="Minst" @input="filterBy()" :min="filterTypes[header].min" :max="filterTypes[header].max">
-                                        <p class="range-label col-4" v-text="getRangeLabel(filterFields[header])"></p>
+                                        <p class="range-label col-4" v-text="getRangeLabel(filterFields[header])" @click="resetRange(header)"></p>
                                         <input class="slider col-4" value="0" type="range" :id="header.replace(' ', '') + '-range2'" v-model="filterFields[header].model2" placeholder="Högst" @input="filterBy()" :min="filterTypes[header].min" :max="filterTypes[header].max">
                                     </div>
                                 </div>
                                 <div class="col-12">
-                                    <button @click="sortBy(header, 'asc')" :id="header.replace(' ', '') + '-asc-btn'"><font-awesome-icon icon="sort-alpha-down"/></button>
-                                    <button v-if="filterTypes[header].type === 'range'" @click="resetRange(header)"><font-awesome-icon icon="redo" /></button>
-                                    <button @click="sortBy(header, 'desc')" :id="header.replace(' ', '') + '-desc-btn'"><font-awesome-icon icon="sort-alpha-down-alt"/></button>
+                                    <button @click="sortBy(header, 'asc')" :id="header.replace(' ', '') + '-asc-btn'" :class="(activeFilteringButtonStatuses[header + 'asc']) ? 'active-btn' : ''"><font-awesome-icon icon="sort-alpha-down"/></button>
+                                    <button @click="sortBy(header, 'desc')" :id="header.replace(' ', '') + '-desc-btn'" :class="(activeFilteringButtonStatuses[header + 'desc']) ? 'active-btn' : ''"><font-awesome-icon icon="sort-alpha-down-alt"/></button>
                                 </div>
                             </div>
                         </div>
@@ -65,9 +64,28 @@
                 columnHeaders: [],
                 filterFields: {},
                 filterTypes: {},
+                activeFilteringButtonStatuses: {},
             };
         },
         methods: {
+            typeConverter(list) {
+                for (let obj_i = 0; obj_i < list.length; obj_i++) {
+                    let tmp_obj = list[obj_i];
+                    let tmp_new_obj = {}
+                    for (let prop_i = 0; prop_i < Object.keys(tmp_obj).length; prop_i++) {
+                        let tmp_prop = Object.keys(tmp_obj)[prop_i];
+                        let tmp_prop_val = tmp_obj[tmp_prop];
+
+                        if (!isNaN(tmp_prop_val)) {
+                            tmp_prop_val = Number(tmp_prop_val);
+                        }
+                        tmp_new_obj[tmp_prop] = tmp_prop_val;
+                    }
+                    list[obj_i] = tmp_new_obj;
+                }
+
+                return list;
+            },
             getRangeLabel(filter) {
                 let label = '';
                 if (!filter.model) {
@@ -91,6 +109,8 @@
                 this.filterFields[header].model = '';
                 this.filterFields[header].model2 = '';
                 this.filterBy();
+                this.activeFilteringButtonStatuses[header + 'asc'] = false;
+                this.activeFilteringButtonStatuses[header + 'desc'] = false;
             },
             resetFilters() {
                 this.onceFetched = [];
@@ -98,19 +118,26 @@
             },
             
             sortBy(column, order) {
-                this.listData = sortArray(this.listData, {
-                    by: column,
-                    order: order,
-                });
-
-                const all_actives = document.getElementsByClassName('active-btn');
-
-                for (let i = 0; i < all_actives.length; i++) {
-                    let tmpBtn = all_actives[i];
-                    tmpBtn.classList.toggle('active-btn');
+                if (this.activeFilteringButtonStatuses[column + order]) {
+                    this.resetFilters();
+                    this.activeFilteringButtonStatuses[column + order] = false;
+                    return;
+                } else {
+                    this.listData = sortArray(this.listData, {
+                        by: column,
+                        order: order,
+                    });
                 }
 
-                document.querySelector('#' + column.replace(' ', '') + '-' + order + '-btn').classList.toggle('active-btn');
+                for (let i = 0; i < Object.keys(this.activeFilteringButtonStatuses).length; i++) {
+                    const tmp_btn = Object.keys(this.activeFilteringButtonStatuses)[i]
+
+                    if (tmp_btn === column + order) {
+                        this.activeFilteringButtonStatuses[column + order] = true;
+                    } else {
+                        this.activeFilteringButtonStatuses[tmp_btn] = false;
+                    }
+                }
             },
             
             filterBy() {
@@ -160,7 +187,7 @@
             },
             
             getFilterTypes() {
-                let filterRow;
+                let filterRow = {};
                 
                 for (let i = 0; i < this.listData.length; i++) {
                     if (i === 0) {
@@ -209,6 +236,8 @@
                                 model: '',
                                 column: tmp_header
                             };
+                            this.activeFilteringButtonStatuses[tmp_header + 'asc'] = false;
+                            this.activeFilteringButtonStatuses[tmp_header + 'desc'] = false;
                         }
                     }
                 }
@@ -288,7 +317,7 @@
                         });
                     });
                 } else {
-                    this.listData = results;
+                    this.listData = this.typeConverter(results);
                 }
                 
                 this.getColumnHeaders();
@@ -426,6 +455,16 @@
         width: 13px;
         border-radius: 50%;
         background: #444;
+    }
+
+    .range-label {
+        margin-top: auto;
+        margin-bottom: auto;
+    }
+
+    .range-label:hover {
+        cursor: pointer;
+        color: var(--info);
     }
 
     * {
