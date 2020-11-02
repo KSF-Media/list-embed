@@ -1,7 +1,6 @@
 <template>
     <div>
         <main>
-            <button @click="resetFilters()"><font-awesome-icon icon="redo" /></button>
             <table aria-describedby="list data">
                 <tr>
                     <th v-for="(header, header_index) in columnHeaders" :key="header_index">
@@ -52,7 +51,7 @@
 
 <script>
     import sortArray from 'sort-array';
-    
+
     export default {
         name: "List",
         props: ["gSheetId"],
@@ -116,7 +115,7 @@
                 this.onceFetched = [];
                 this.fetchListData({})
             },
-            
+
             sortBy(column, order) {
                 if (this.activeFilteringButtonStatuses[column + order]) {
                     this.resetFilters();
@@ -139,10 +138,10 @@
                     }
                 }
             },
-            
+
             filterBy() {
                 let filterObj = {};
-                
+
                 for (let i = 0; i < Object.keys(this.filterFields).length; i++) {
                     let tmpSearchField = this.filterFields[
                             Object.keys(this.filterFields)[i]
@@ -152,9 +151,9 @@
                         filterObj[tmpSearchField.column] = [tmpSearchField.model, tmpSearchField.model2];
                     }
                 }
-                
+
                 let checker = [];
-                
+
                 for (
                         let filterObj_i = 0;
                         filterObj_i < Object.keys(filterObj).length;
@@ -164,17 +163,17 @@
                         checker.push(false);
                     }
                 }
-                
+
                 if (checker.length === Object.keys(filterObj).length) {
                     this.resetFilters();
                 } else {
                     this.fetchListData(filterObj);
                 }
             },
-            
+
             getColumnValues(column) {
                 let column_values = [];
-                
+
                 for (let row_i = 0; row_i < this.listData.length; row_i++) {
                     let row = this.listData[row_i];
                     let column_value = row[column];
@@ -182,13 +181,13 @@
                         column_values.push(column_value);
                     }
                 }
-                
+
                 return column_values;
             },
-            
+
             getFilterTypes() {
                 let filterRow = {};
-                
+
                 for (let i = 0; i < this.listData.length; i++) {
                     if (i === 0) {
                         filterRow = this.listData[i];
@@ -196,19 +195,19 @@
                     }
                 }
                 this.listData.splice(0, 1);
-    
+
                 for (let filter_i = 0; filter_i < Object.keys(filterRow).length; filter_i++) {
                     let forColumn = Object.keys(filterRow)[filter_i];
-                    
+
                     let filterType = filterRow[forColumn];
                     this.filterTypes[forColumn] = {
                         type: filterType,
                     };
-                    
+
                     if (filterType === 'category') {
                        this.filterTypes[forColumn]['values'] = this.getColumnValues(forColumn)
                     }
-                    
+
                     if (filterType === 'range') {
                         const values = this.getColumnValues(forColumn);
                         this.filterTypes[forColumn]['max'] = Math.max(...values);
@@ -217,12 +216,12 @@
                     }
                 }
             },
-            
+
             getColumnHeaders() {
                 let tmp_header;
                 let key_i;
                 let row_i;
-                
+
                 for (row_i = 0; row_i < this.listData.length; row_i++) {
                     for (
                             key_i = 0;
@@ -242,11 +241,11 @@
                     }
                 }
             },
-            
+
             listDataLoader(results, filterObj) {
                 if (Object.keys(filterObj).length > 0) {
                     let tmpResults = {};
-                    
+
                     for (let results_i = 0; results_i < results.length; results_i++) {
                         let tmpResult = results[results_i];
                         for (
@@ -264,7 +263,7 @@
                                 tmpFilter['min'] = filterObj[Object.keys(filterObj)[filter_i]][0];
                                 tmpFilter['max'] = filterObj[Object.keys(filterObj)[filter_i]][1];
                             }
-                            
+
                             if (Object.keys(tmpResult).includes(tmpFilter.title)) {
                                 if (tmpFilter.filter === 'is_range') {
                                     let min = tmpFilter.min;
@@ -300,9 +299,9 @@
                             }
                         }
                     }
-                    
+
                     let final = [];
-                    
+
                     for (
                             let tmpResults_i = 0;
                             tmpResults_i < Object.keys(tmpResults).length;
@@ -310,7 +309,7 @@
                     ) {
                         final.push(tmpResults[Object.keys(tmpResults)[tmpResults_i]]);
                     }
-                    
+
                     this.listData = final.shift().filter(function(v) {
                         return final.every(function(a) {
                             return a.indexOf(v) !== -1;
@@ -319,10 +318,10 @@
                 } else {
                     this.listData = this.typeConverter(results);
                 }
-                
+
                 this.getColumnHeaders();
             },
-            
+
             fetchListData(filterObj) {
                 if (Object.keys(this.onceFetched).length === 0) {
                     const GSheetReader = require("g-sheets-api");
@@ -330,7 +329,7 @@
                         sheetId: this.gSheetId,
                         returnAllResults: false
                     };
-                    
+
                     GSheetReader(readerOptions, results => {
                         this.onceFetched = results;
                         this.listDataLoader(results, filterObj);
@@ -353,14 +352,14 @@
         padding: 0;
         margin: 0;
     }
-    
+
     main {
         width: 100%;
         height: 100%;
         padding: 5px;
         background-color: #f7f7f7;
     }
-    
+
     table {
         width: 100%;
         overflow: scroll;
@@ -372,14 +371,15 @@
     }
 
     h2 {
-        font-size: 1.2em !important;
-        font-weight: bold !important;
+        font-size: 0.8em !important;
+        font-weight: 600 !important;
         padding: 2px;
         border-radius: 10px;
-        max-width: 50%;
+        max-width: 80%;
         margin-left: auto;
         margin-right: auto;
-        text-align: center;
+        margin-bottom: 1px;
+        text-align: left;
         color: #444;
     }
 
@@ -473,6 +473,10 @@
     }
 
     @media screen and (max-width: 600px) {
+        h2 {
+            font-size: 0.7em;
+        }
+
         table {
             padding: 10px;
         }
@@ -492,6 +496,10 @@
         td, th {
             border-bottom: 1px solid #F3F1ED;
             display: block;
+        }
+
+        td p {
+            font-size: 12px;
         }
 
         td:last-child {
