@@ -6,34 +6,6 @@
                     <th v-for="(header, header_index) in columnHeaders" :key="header_index">
                         <div class="th-data">
                             <h2 v-text="header.substring(0, 1).toUpperCase() +  header.substring(1, header.length)"></h2>
-                            <div class="row mx-auto">
-                                <div class="col-12" v-if="filterTypes[header].type === 'search'">
-                                    <div class="row search-area">
-                                        <input class="col-12" type="search" v-model="filterFields[header].model" placeholder="Sök..." @input="filterBy()"/>
-                                    </div>
-                                </div>
-                                <div class="col-12" v-else-if="filterTypes[header].type === 'category'">
-                                    <div class="row search-area">
-                                        <input class="col-12" type="search" :list="header.replace(' ', '') + '-list'" v-model="filterFields[header].model" placeholder="Sök..."  @input="filterBy()">
-                                        <datalist :id="header.replace(' ', '') + '-list'">
-                                            <div v-for="(value, value_index) in filterTypes[header].values" :key="value_index">
-                                                <option :value="value"></option>
-                                            </div>
-                                        </datalist>
-                                    </div>
-                                </div>
-                                <div class="col-12 range-input-area" v-else-if="filterTypes[header].type === 'range'">
-                                    <div class="row search-area">
-                                        <input class="slider col-4" value="0" type="range" :id="header.replace(' ', '') + '-range'" v-model="filterFields[header].model" placeholder="Minst" @input="filterBy()" :min="filterTypes[header].min" :max="filterTypes[header].max">
-                                        <p class="range-label col-4" v-text="getRangeLabel(filterFields[header])" @click="resetRange(header)"></p>
-                                        <input class="slider col-4" value="0" type="range" :id="header.replace(' ', '') + '-range2'" v-model="filterFields[header].model2" placeholder="Högst" @input="filterBy()" :min="filterTypes[header].min" :max="filterTypes[header].max">
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <button @click="sortBy(header, 'asc')" :id="header.replace(' ', '') + '-asc-btn'" :class="(activeFilteringButtonStatuses[header + 'asc']) ? 'active-btn' : ''"><font-awesome-icon icon="sort-alpha-down"/></button>
-                                    <button @click="sortBy(header, 'desc')" :id="header.replace(' ', '') + '-desc-btn'" :class="(activeFilteringButtonStatuses[header + 'desc']) ? 'active-btn' : ''"><font-awesome-icon icon="sort-alpha-down-alt"/></button>
-                                </div>
-                            </div>
                         </div>
                     </th>
                 </tr>
